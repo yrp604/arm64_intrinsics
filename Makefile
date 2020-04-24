@@ -23,12 +23,17 @@ all: $(TARGET)
 
 src/msr.h: msr.py
 	python msr.py
+	clang-format -i src/msr.h || cd .
 
 src/arm64_intrinsics.cpp.obj: src/arm64_intrinsics.cpp src/msr.h
 	$(CC) $(CFLAGS) $(INC) /c /Fo$@ $**
 
 $(TARGET): src/arm64_intrinsics.cpp.obj
 	$(LD) $(LDFLAGS) $(BINJACORE) $(BINJA_API_A) $** /out:$@
+
+.PHONY: fmt
+fmt:
+	clang-format -i src/arm64_intrinsics.cpp
 
 install: $(TARGET)
 	copy $(TARGET) $(PLUGIN_DIR)
