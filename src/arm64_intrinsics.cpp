@@ -99,8 +99,8 @@ public:
     return regs;
   }
 
-  virtual vector<uint32_t> GetGlobalRegisters() override {
-    vector<uint32_t> regs = ArchitectureHook::GetGlobalRegisters();
+  virtual vector<uint32_t> GetSystemRegisters() override {
+    vector<uint32_t> regs = ArchitectureHook::GetSystemRegisters();
 
     for (auto const &ii : msr) {
       regs.push_back(MSR_BASE + ii.first);

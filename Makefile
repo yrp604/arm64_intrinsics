@@ -44,6 +44,7 @@ uninstall:
 .PHONY: clean
 clean:
 	-del src\*.obj
+	-del src\msr.h
 	-del arm64_intrinsics.dll
 	-del arm64_intrinsics.lib
 	-del *.pdb

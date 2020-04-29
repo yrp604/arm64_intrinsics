@@ -1,8 +1,24 @@
 # Arm64Intrinsics for Binja
 
-Only like, five of them.
+In Binja's HLIL some useful information can be removed via unlifted
+instructions. This adds a lifter for like, five of them.
+
+### Before
+![before](res/before.png)
+
+### After
+![after](res/after.png)
+
+## Help Wanted
+
+- [ ] Add more intrinsics. Note that this plugin is focused soley on
+      unlifted instructions that would be lifted as intrinsics if binja lifted
+      them, NOT general unlifted instructions.
+- [ ] Makefile for GNU+Linux and macOS
 
 ## Build
+
+Requires Binja build >= 2114.
 
 Makefile provided for `nmake` with vs2019. It should be pretty easy to port to
 other platforms.

@@ -1,9 +1,5 @@
 # TODO
 
-- Either fix register dst removal or calling convention addition with global
-  registers
-- Add Photos
-
 ## Instructions
 
 https://developer.arm.com/docs/ddi0596/b/base-instructions-alphabetic-order
@@ -14,3 +10,6 @@ https://developer.arm.com/docs/ddi0596/b/base-instructions-alphabetic-order
 - TLBI (000140e0)
 - DC (00013cd0)
 - DMB
+
+Addresses in parens are just notes to find instances of these ins easily in
+SSTIC 2019 rom.bin.
