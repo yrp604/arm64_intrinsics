@@ -24,6 +24,9 @@ regs = {}
 # if there are named registers that fall within that range, they can overwrite
 # them later
 for regname, bits in filter(lambda x: 'x' in x[1], msrs.items()):
+    # skip unnamed MSRs due to startup time increase if we add 15k registers
+    if regname == 'S3_<op1>_<Cn>_<Cm>_<op2>': continue
+
     low = int(bits.replace('x', '0'), 2)
     high = int(bits.replace('x', '1'), 2)
 

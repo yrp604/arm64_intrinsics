@@ -26,6 +26,38 @@ constexpr uint32_t MSR_BASE = 0x4200;
 
 class arm64Intrinsics : public ArchitectureHook {
 private:
+  constexpr uint8_t SrOp0(uint32_t ins) { return ((ins >> 19) & 0b1) + 2; }
+
+  constexpr uint8_t SrOp1(uint32_t ins) { return (ins >> 16) & 0b111; }
+
+  constexpr uint8_t SrOp2(uint32_t ins) { return (ins >> 5) & 0b111; }
+
+  constexpr uint8_t SrXt(uint32_t ins) { return ins & 0b11111; }
+
+  constexpr uint8_t SrCm(uint32_t ins) { return (ins >> 8) & 0b1111; }
+
+  constexpr uint8_t SrCn(uint32_t ins) { return (ins >> 12) & 0b1111; }
+
+  constexpr uint32_t StatusReg(uint8_t o0, uint8_t o1, uint8_t Cn, uint8_t Cm,
+                               uint8_t o2) {
+    return o0 << 14 | o1 << 11 | Cn << 7 | Cm << 3 | o2;
+  }
+
+  // If we add all the MSRs to the msr map, it adds 15k registers. This map is
+  // checked very frequently during startup and adds considerable slowdown to
+  // launch times. As a result, we only only add the named status regsiters,
+  // however this means its possible we have an MSR intrinsic with an opcode
+  // that references a register we haven't added. As a result, we test when
+  // decoding that the Intrinsic is referencing a MSR we've added.
+  bool ValidStatusReg(uint8_t o0, uint8_t o1, uint8_t Cn, uint8_t Cm,
+                      uint8_t o2) {
+    const uint32_t key = StatusReg(o0, o1, Cn, Cm, o2);
+
+    return msr.find(key) != msr.end();
+  }
+
+  const char *StatusRegName(uint32_t key) { return msr[key]; }
+
   // we need a shotgun arm64 decoder
   constexpr uint32_t DecodeIntrinsic(const uint8_t *data, size_t sz) {
     if (sz < 4)
@@ -47,37 +79,25 @@ private:
       return WFE;
 
     if (candidate >> 20 == 0b110101010001)
-      return MSR_REG;
+      if (ValidStatusReg(SrOp0(candidate), SrOp1(candidate), SrCn(candidate),
+                         SrCm(candidate), SrOp2(candidate)))
+        return MSR_REG;
 
     const uint32_t msr_imm = 0b11010101000000000100000000011111;
     const uint32_t msr_imm_mask = 0b11010101000000000100000000011111;
-    if ((candidate & msr_imm_mask) == msr_imm)
-      return MSR_IMM;
+    if ((candidate & msr_imm_mask) == msr_imm) {
+      if (ValidStatusReg(SrOp0(candidate), SrOp1(candidate), SrCn(candidate),
+                         SrCm(candidate), SrOp2(candidate)))
+        return MSR_IMM;
+    }
 
     if (candidate >> 20 == 0b110101010011)
-      return MRS;
+      if (ValidStatusReg(SrOp0(candidate), SrOp1(candidate), SrCn(candidate),
+                         SrCm(candidate), SrOp2(candidate)))
+        return MRS;
 
     return 0;
   }
-
-  constexpr uint8_t SrOp0(uint32_t ins) { return ((ins >> 19) & 0b1) + 2; }
-
-  constexpr uint8_t SrOp1(uint32_t ins) { return (ins >> 16) & 0b111; }
-
-  constexpr uint8_t SrOp2(uint32_t ins) { return (ins >> 5) & 0b111; }
-
-  constexpr uint8_t SrXt(uint32_t ins) { return ins & 0b11111; }
-
-  constexpr uint8_t SrCm(uint32_t ins) { return (ins >> 8) & 0b1111; }
-
-  constexpr uint8_t SrCn(uint32_t ins) { return (ins >> 12) & 0b1111; }
-
-  constexpr uint32_t StatusReg(uint8_t o0, uint8_t o1, uint8_t Cn, uint8_t Cm,
-                               uint8_t o2) {
-    return o0 << 14 | o1 << 11 | Cn << 7 | Cm << 3 | o2;
-  }
-
-  const char *StatusRegName(uint32_t key) { return msr[key]; }
 
 public:
   arm64Intrinsics(Architecture *arm64) : ArchitectureHook(arm64) {}
