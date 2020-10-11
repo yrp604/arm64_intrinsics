@@ -1,3 +1,13 @@
+# 2020-10-11 RIP
+
+Thanks to upstream changes in the binja arm64 plugin, this code is now redundant
+-- there is a more complete, better maintained, and better tested version in the core
+architecture plugin. This plugin does still serve as a good example of an architecture
+hook and lifting intrinsics, but no further development will happen here.
+
+If you're interested in lifting additional arm64 instruction, please
+[contribute them upstream](https://github.com/Vector35/arch-arm64).
+
 # Arm64Intrinsics for Binja
 
 In Binja's HLIL some useful information can be removed via unlifted
